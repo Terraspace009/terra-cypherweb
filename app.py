@@ -12,6 +12,9 @@ from radar_utils_fixed import plot_emotion_radar
 from matrix_renderer import frame_to_matrix_dots
 from matplotlib import font_manager as fm
 
+import gdown
+import os
+
 # --- Styling ---
 st.markdown(f"""
     <style>
@@ -48,6 +51,14 @@ st.markdown("<h1 style='text-align:center;'>TERRA-CYPHER</h1>", unsafe_allow_htm
 # --- Load Model ---
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_path = "terra_emotion_model_vgg13.pt"
+
+# Google Drive download if model missing
+if not os.path.exists(model_path):
+    url = "https://drive.google.com/uc?id=17xJa95zg466gVIzIshKKwfld6Mfv20mR"
+    print("Downloading model from Google Drive...")
+    gdown.download(url, model_path, quiet=False)
+    print("Model downloaded successfully")
+
 emotion_labels = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
 model = load_model(model_path, device)
 history = []
@@ -145,3 +156,4 @@ else:
             unsafe_allow_html=True
         )
         radar_placeholder.pyplot(radar_fig, clear_figure=True)
+
