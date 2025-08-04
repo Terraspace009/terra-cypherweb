@@ -77,25 +77,18 @@ def detect_and_crop_face(frame):
 prev_gray = None
 mode = st.radio("Select Mode", ("Webcam", "Image Upload"))
 
-# -------------------- WEBCAM --------------------
+# -------------------- WEBCAM (Streamlit Cloud Compatible) --------------------
 if mode == "Webcam":
-    cap = cv2.VideoCapture(0)
-    col1, col2, col3 = st.columns([1.0, 1.1, 1.0])
-    frame_placeholder = col1.empty()
-    matrix_placeholder = col2.empty()
-    radar_placeholder = col3.empty()
-    emotion_placeholder = st.empty()
+    camera_input = st.camera_input("Enable Webcam")
 
-    current_emotion = ""
-    current_confidence = 0
-    frame_count = 0
+    if camera_input is not None:
+        # Convert captured image to OpenCV format
+        image_bytes = camera_input.getvalue()
+        np_img = np.frombuffer(image_bytes, np.uint8)
+        frame_rgb = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+        frame_rgb = cv2.cvtColor(frame_rgb, cv2.COLOR_BGR2RGB)
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        col1, col2, col3 = st.columns([1.0, 1.1, 1.0])
 
         # --- Emotion detection (cropped face) ---
         face_for_emotion = detect_and_crop_face(frame_rgb)
@@ -103,29 +96,21 @@ if mode == "Webcam":
             model, face_for_emotion, emotion_labels, history, device
         )
 
-        if emotion != current_emotion and confidence < 0.5:
-            emotion = current_emotion
-
-        current_emotion = emotion
-        current_confidence = (current_confidence * 0.7) + (confidence * 0.3)
-
-        # --- ASCII rendering (unchanged) ---
-        dot_image, prev_gray = frame_to_matrix_dots(
-            frame_rgb, cols=80, dot_size=5, prev_gray=prev_gray, emotion=current_emotion
+        # --- ASCII rendering ---
+        dot_image, _ = frame_to_matrix_dots(
+            frame_rgb, cols=80, dot_size=5, emotion=emotion
         )
 
         radar_fig = plot_emotion_radar(emotion_labels, smoothed_probs)
 
-        frame_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
-        emotion_placeholder.markdown(
-            f"<div class='emotion-box'>{current_emotion.upper()} ({current_confidence * 100:.1f}%)</div>",
+        col1.image(frame_rgb, channels="RGB", use_container_width=True)
+        st.markdown(
+            f"<div class='emotion-box'>{emotion.upper()} ({confidence * 100:.1f}%)</div>",
             unsafe_allow_html=True
         )
-        matrix_placeholder.image(dot_image, use_container_width=True)
-        radar_placeholder.pyplot(radar_fig, clear_figure=True)
+        col2.image(dot_image, use_container_width=True)
+        col3.pyplot(radar_fig, clear_figure=True)
 
-        frame_count += 1
-        time.sleep(0.02)
 
 # -------------------- IMAGE UPLOAD --------------------
 else:
@@ -157,5 +142,6 @@ else:
             unsafe_allow_html=True
         )
         radar_placeholder.pyplot(radar_fig, clear_figure=True)
+
 
 
