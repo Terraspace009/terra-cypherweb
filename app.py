@@ -20,7 +20,7 @@ st.markdown(f"""
     <style>
     @font-face {{
         font-family: Cyber;
-        src: url('/app/static/Cyber-Bold.ttf');
+        src: url('fonts/Cyber-Bold.ttf');
     }}
     h1 {{
         margin-top: 20px;
@@ -142,6 +142,7 @@ else:
             unsafe_allow_html=True
         )
         radar_placeholder.pyplot(radar_fig, clear_figure=True)
+
 
 
 
