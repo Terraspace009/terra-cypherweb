@@ -20,7 +20,7 @@ st.markdown(f"""
     <style>
     @font-face {{
         font-family: Cyber;
-        src: url('fonts/Cyber-Bold.ttf');
+        src: url('/app/static/Cyber-Bold.ttf');
     }}
     h1 {{
         margin-top: 20px;
@@ -45,6 +45,7 @@ st.markdown(f"""
     }}
     </style>
 """, unsafe_allow_html=True)
+
 
 st.markdown("<h1 style='text-align:center;'>TERRA-CYPHER</h1>", unsafe_allow_html=True)
 
@@ -156,4 +157,5 @@ else:
             unsafe_allow_html=True
         )
         radar_placeholder.pyplot(radar_fig, clear_figure=True)
+
 
